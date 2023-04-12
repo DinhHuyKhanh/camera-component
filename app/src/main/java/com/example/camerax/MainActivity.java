@@ -25,6 +25,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -39,13 +40,22 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.camerax.presenter.IPlatePresenter;
+import com.example.camerax.presenter.PlatePresenter;
+import com.example.camerax.view.IPlateView;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 
 //saus: https://codelabs.developers.google.com/codelabs/camerax-getting-started/
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IPlateView {
 
     private static final int GALLERY_REQUEST_CODE = 1;
     private final int REQUEST_CODE_PERMISSIONS = 10; //arbitrary number, can be changed accordingly
@@ -54,11 +64,10 @@ public class MainActivity extends AppCompatActivity {
             ,"android.permission.WRITE_EXTERNAL_STORAGE"
             ,"android.permission.READ_EXTERNAL_STORAGE"}; //array w/ permissions from manifest
     TextureView txView;
-
     String imagePath;
     ImageView imageView;
-    Button btnGallery;
-
+    Button btnGallery, submitBtn;
+    private IPlatePresenter platePresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         imageView = findViewById(R.id.imageView);
         txView = findViewById(R.id.view_finder);
         btnGallery = findViewById(R.id.galery_button);
+        submitBtn = findViewById(R.id.submit_button);
 
         txView.setOnClickListener((v)  -> {
             startCamera();
@@ -84,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, GALLERY_REQUEST_CODE);
         });
 
-
+        setBtnSubmit();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -105,7 +115,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void setBtnSubmit(){
+        submitBtn.setOnClickListener(item->{
+            ImageView imageView = findViewById(R.id.imageView);
+            Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+            System.out.println("1 hehee----------------------------------");
+            //Chuyển đổi Bitmap thành đối tượng byte[] (mảng byte)
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] imageBytes = byteArrayOutputStream.toByteArray();
+            System.out.println("2 hehee----------------------------------");
+            // dong goi du lieu
+            RequestBody requestBody = RequestBody.create(MediaType.parse("image/jpeg"), imageBytes);
+            MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", "plate.jpg", requestBody);
+            System.out.println("3 hehee----------------------------------");
+            platePresenter = new PlatePresenter(this);
+            platePresenter.sendImage(imagePart);
 
+            System.out.println("4 hehee----------------------------------");
+
+        });
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -257,5 +287,15 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    @Override
+    public void onComplete(boolean isSuccessful) {
+        System.out.printf("1. callback api upload images %d", isSuccessful);
+    }
+
+    @Override
+    public void onError(String message) {
+        System.out.printf("2. callback api upload images error %s", message);
     }
 }
