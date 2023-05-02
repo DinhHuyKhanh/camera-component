@@ -290,8 +290,12 @@ public class MainActivity extends AppCompatActivity implements IPlateView {
     }
 
     @Override
-    public void onComplete(boolean isSuccessful) {
-        System.out.printf("1. callback api upload images %d", isSuccessful);
+    public void onComplete(String isSuccessful) {
+        System.out.printf("1. callback api upload images ");
+        System.out.printf(isSuccessful);
+        imageView = findViewById(R.id.imageView);
+        imageView.setImageDrawable(null);
+        startCamera();
     }
 
     @Override

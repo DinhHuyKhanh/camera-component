@@ -18,7 +18,12 @@ public class PlatePresenter implements IPlatePresenter{
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()){
-                    plateView.onComplete(response.isSuccessful());
+                    System.out.print("-------------------------");
+                    System.out.print(response);
+                    System.out.print(response.isSuccessful());
+                    System.out.print(response.body());
+                    System.out.print("-------------------------");
+                    plateView.onComplete("success");
                 }else{
                     plateView.onError("error");
                 }

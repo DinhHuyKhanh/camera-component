@@ -21,12 +21,14 @@ public interface IAPIService {
             .create();
 
     OkHttpClient httpClient = new OkHttpClient.Builder()
-            .connectTimeout(5, TimeUnit.SECONDS) // Thiết lập timeout kết nối
-            .readTimeout(5, TimeUnit.SECONDS) // Thiết lập timeout đọc dữ liệu
-            .writeTimeout(5, TimeUnit.SECONDS) // Thiết lập timeout ghi dữ liệu
+            .connectTimeout(60, TimeUnit.SECONDS) // Thiết lập timeout kết nối
+            .readTimeout(60, TimeUnit.SECONDS) // Thiết lập timeout đọc dữ liệu
+            .writeTimeout(60, TimeUnit.SECONDS) // Thiết lập timeout ghi dữ liệu
             .build();
+
+
     IAPIService apiService = new Retrofit.Builder()
-            .baseUrl("http:192.168.1.15:8000")
+            .baseUrl("http:192.168.220.95:8000")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .client(httpClient)
             .build()
